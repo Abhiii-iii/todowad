@@ -6,58 +6,59 @@ const count = document.getElementById("count");
 
 let todos = JSON.parse(localStorage.getItem("todos")) || [];
 
-function saveTodos() {
+function save() {
   localStorage.setItem("todos", JSON.stringify(todos));
 }
 
-function showTodos() {
+function render() {
   list.innerHTML = "";
 
   todos.forEach(todo => {
-    const item = document.createElement("li");
-    item.className = "item";
+    const li = document.createElement("li");
 
-    if (todo.done) {
-      item.classList.add("done");
-    }
+    li.className = "item" + (todo.done ? " done" : "");
 
-    const checkButton = document.createElement("button");
-    checkButton.className = "item__check";
+    const check = document.createElement("button");
 
-    checkButton.onclick = () => {
+    check.className = "item__check";
+
+    check.onclick = () => {
       todo.done = !todo.done;
-      saveTodos();
-      showTodos();
+
+      save();
+      render();
     };
 
     const text = document.createElement("span");
+
     text.className = "item__text";
     text.textContent = todo.text;
 
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "item__remove";
-    deleteButton.textContent = "✕";
+    const remove = document.createElement("button");
 
-    deleteButton.onclick = () => {
-      todos = todos.filter(item => item.id !== todo.id);
-      saveTodos();
-      showTodos();
+    remove.className = "item__remove";
+    remove.textContent = "✕";
+
+    remove.onclick = () => {
+      todos = todos.filter(t => t.id !== todo.id);
+
+      save();
+      render();
     };
 
-    item.append(checkButton, text, deleteButton);
-    list.appendChild(item);
+    li.append(check, text, remove);
+    list.appendChild(li);
   });
 
-  count.textContent = todos.filter(todo => !todo.done).length + " left";
+  count.textContent = todos.filter(t => !t.done).length + " left";
+
   empty.classList.toggle("show", todos.length === 0);
 }
 
-form.onsubmit = event => {
-  event.preventDefault();
+form.onsubmit = e => {
+  e.preventDefault();
 
-  if (input.value.trim() === "") {
-    return;
-  }
+  if (!input.value.trim()) return;
 
   todos.unshift({
     id: Date.now(),
@@ -65,11 +66,11 @@ form.onsubmit = event => {
     done: false
   });
 
-  saveTodos();
-  showTodos();
+  save();
+  render();
 
   input.value = "";
   input.focus();
 };
 
-showTodos();
+render();
